@@ -27,7 +27,7 @@ bmp_result_t BMP::write(const nav_msgs::OccupancyGrid& grid, FILE *f)
     {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 8,0};
   
   const unsigned char row_padding[3] = {0,0,0};
-  const int row_padding_len = width % 4;
+  const int row_padding_len = (4 - (width % 4)) % 4;
   
   if (f == NULL) {
     return BMP_INVALID_FILE_HANDLE;
@@ -76,7 +76,7 @@ bmp_result_t BMP::write(const nav_msgs::OccupancyGrid& grid, FILE *f)
   }
   
   /* Write file data */
-  for (r = height - 1; r >= 0; r --) {
+  for (r = 0; r < height; r ++) {
     fwrite(&grid.data[r * width], 1, width, f);
     fwrite(row_padding, 1, row_padding_len, f);
   }
@@ -130,7 +130,7 @@ bmp_result_t BMP::read(nav_msgs::OccupancyGrid* const grid, FILE *f)
     grid->info.width  = width;
     grid->info.height = height;
     
-    row_padding_len = width % 4;
+    row_padding_len   = (4 - (width % 4)) % 4;
     data_size = width * height;
     
     grid->data.resize(data_size);
@@ -174,7 +174,7 @@ bmp_result_t BMP::read(nav_msgs::OccupancyGrid* const grid, FILE *f)
     fseek(f, *pixel_offset, SEEK_SET);
   }
   
-  for (r = height - 1; r >= 0; r --) {
+  for (r = 0; r < height; r ++) {
     bytes_read = fread(&grid->data[r * width], 1, width, f);
     if (bytes_read != width) {
       return BMP_READ_ERROR;
